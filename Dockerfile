@@ -1,21 +1,27 @@
 FROM node:18-alpine
 
+# Install system dependencies for video processing
+RUN apk add --no-cache python3 py3-pip ffmpeg
+
+# Install yt-dlp using --break-system-packages flag
+RUN pip3 install --break-system-packages yt-dlp
+
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-COPY client/package*.json ./client/
-
-# Install dependencies with --legacy-peer-deps to avoid conflicts
-RUN npm install --legacy-peer-deps
-RUN cd client && npm install --legacy-peer-deps
-
-# Copy source code
+# Copy everything first
 COPY . .
 
-# Build with specific NODE_ENV
-RUN NODE_ENV=production npm run build
+# Install root dependencies
+RUN npm install
 
+# Install client dependencies
+RUN cd client && npm install
+
+# Build the application
+RUN npm run build
+
+# Expose port
 EXPOSE 5000
 
+# Start the application
 CMD ["npm", "start"]
