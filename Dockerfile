@@ -42,5 +42,10 @@ USER node
 # Expose the port the app runs on
 EXPOSE 5000
 
-# Run the compiled JavaScript application
-CMD ["node", "dist/index.js"]
+# Multiple entry point options - the deployment system can use any of these
+# Option 1: Direct compiled entry (preferred)
+# CMD ["node", "dist/index.js"]
+# Option 2: Through npm start
+# CMD ["npm", "start"]
+# Option 3: Through compatibility entry point (for systems expecting server/index.js)
+CMD ["node", "server/index.js"]
