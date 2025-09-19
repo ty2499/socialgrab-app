@@ -32,18 +32,8 @@ export default function ImageAdBanner({ placement, className = "", fallback }: I
 
   const adConfig = ads?.find(ad => ad.placement === placement);
 
-  // Don't render if ad is disabled, not configured, or not image type
-  if (!adConfig || !adConfig.isEnabled || adConfig.adType !== 'image') {
-    return fallback ? <>{fallback}</> : null;
-  }
-
-  // Check if we have any image URLs configured
-  if (!adConfig.imageDesktopUrl && !adConfig.imageTabletUrl && !adConfig.imageMobileUrl) {
-    return fallback ? <>{fallback}</> : null;
-  }
-
   const handleImageClick = () => {
-    if (adConfig.clickUrl) {
+    if (adConfig?.clickUrl) {
       window.open(adConfig.clickUrl, '_blank', 'noopener,noreferrer');
     }
   };
@@ -54,13 +44,10 @@ export default function ImageAdBanner({ placement, className = "", fallback }: I
     setImageError(true);
   };
 
-
-  if (imageError) {
-    return fallback ? <>{fallback}</> : null;
-  }
-
   // Get responsive image URL based on screen size and availability
   const getResponsiveImageUrl = () => {
+    if (!adConfig) return undefined;
+    
     // Get viewport width (fallback for SSR)
     const width = typeof window !== 'undefined' ? window.innerWidth : 1024;
     
@@ -83,15 +70,33 @@ export default function ImageAdBanner({ placement, className = "", fallback }: I
 
   // Update image source when config changes or on mount
   useEffect(() => {
+    if (!adConfig) return;
+    
     const newSrc = getResponsiveImageUrl();
     if (newSrc && newSrc !== currentImageSrc) {
       setCurrentImageSrc(newSrc);
       setImageError(false);
     }
-  }, [adConfig?.imageDesktopUrl, adConfig?.imageTabletUrl, adConfig?.imageMobileUrl, currentImageSrc]);
+  }, [adConfig?.imageDesktopUrl, adConfig?.imageTabletUrl, adConfig?.imageMobileUrl, currentImageSrc, adConfig]);
+
+  // All hooks have been called - now we can do early returns
+  
+  // Don't render if ad is disabled, not configured, or not image type
+  if (!adConfig || !adConfig.isEnabled || adConfig.adType !== 'image') {
+    return fallback ? <>{fallback}</> : null;
+  }
+
+  // Check if we have any image URLs configured
+  if (!adConfig.imageDesktopUrl && !adConfig.imageTabletUrl && !adConfig.imageMobileUrl) {
+    console.warn(`No valid image URLs found for ad placement: ${placement}`);
+    return fallback ? <>{fallback}</> : null;
+  }
+
+  if (imageError) {
+    return fallback ? <>{fallback}</> : null;
+  }
   
   if (!currentImageSrc) {
-    console.warn(`No valid image URLs found for ad placement: ${placement}`);
     return fallback ? <>{fallback}</> : null;
   }
 
