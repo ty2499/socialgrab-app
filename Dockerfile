@@ -1,27 +1,26 @@
 FROM node:18-alpine
 
-# Install system dependencies for video processing
-RUN apk add --no-cache python3 py3-pip ffmpeg
+# Install system dependencies
+RUN apk add --no-cache python3 py3-pip py3-venv ffmpeg
 
-# Install yt-dlp using --break-system-packages flag
-RUN pip3 install --break-system-packages yt-dlp
+# Create virtual environment and install yt-dlp
+RUN python3 -m venv /opt/venv
+RUN /opt/venv/bin/pip install yt-dlp
+
+# Add virtual environment to PATH
+ENV PATH="/opt/venv/bin:$PATH"
 
 WORKDIR /app
 
 # Copy everything first
 COPY . .
 
-# Install root dependencies
+# Install dependencies
 RUN npm install
-
-# Install client dependencies
 RUN cd client && npm install
 
 # Build the application
 RUN npm run build
 
-# Expose port
 EXPOSE 5000
-
-# Start the application
 CMD ["npm", "start"]
