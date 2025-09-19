@@ -30,6 +30,7 @@ RUN npm ci --omit=dev
 # Copy build artifacts and runtime assets
 COPY --from=builder /app/dist ./dist
 COPY server/templates ./server/templates
+COPY server/index.js ./server/index.js
 
 # Create necessary directories and set permissions
 RUN mkdir -p client/public/uploads temp_downloads \
