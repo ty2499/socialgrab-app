@@ -1,26 +1,45 @@
-FROM node:18-alpine
-
-# Install minimal system dependencies
-RUN apk add --no-cache python3 py3-pip ffmpeg
-RUN pip3 install --break-system-packages yt-dlp
-
+# syntax=docker/dockerfile:1
+FROM node:20-bullseye-slim AS builder
 WORKDIR /app
+ENV NODE_ENV=development
 
-# Copy package files
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends python3 python3-pip git && rm -rf /var/lib/apt/lists/*
+
+# Copy package files and install dependencies
 COPY package*.json ./
+RUN npm ci
 
-# Install only root dependencies
-RUN npm install --omit=dev
-
-# Copy source code
+# Copy source code and build the application
 COPY . .
+RUN npm run build
 
-# Set environment variables
+FROM node:20-bullseye-slim AS runner
+WORKDIR /app
 ENV NODE_ENV=production
-ENV PORT=5000
 
-# Expose port
+# Install runtime dependencies for video downloader
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg python3 python3-pip \
+  && pip3 install -U yt-dlp \
+  && rm -rf /var/lib/apt/lists/*
+
+# Install only production node dependencies
+COPY package*.json ./
+RUN npm ci --omit=dev
+
+# Copy build artifacts and runtime assets
+COPY --from=builder /app/dist ./dist
+COPY server/templates ./server/templates
+
+# Create necessary directories and set permissions
+RUN mkdir -p client/public/uploads temp_downloads \
+  && chown -R node:node /app
+
+# Switch to non-root user
+USER node
+
+# Expose the port the app runs on
 EXPOSE 5000
 
-# Start with a simple node command
-CMD ["node", "server/index.js"]
+# Run the compiled JavaScript application
+CMD ["node", "dist/index.js"]
