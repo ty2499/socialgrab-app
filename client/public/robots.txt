@@ -1,0 +1,64 @@
+# SocialGrab - Video Downloader Robots.txt
+# Optimized for SEO and search engine visibility
+
+User-agent: *
+Allow: /
+Allow: /help
+Allow: /contact
+Allow: /privacy
+Allow: /terms
+Allow: /subscription
+
+# Block sensitive areas
+Disallow: /api/
+Disallow: /admin/
+Disallow: /downloads/
+Disallow: /_next/
+Disallow: /node_modules/
+
+# Block dynamic parameters that create duplicate content
+Disallow: /*?utm_*
+Disallow: /*?ref=*
+Disallow: /*?fbclid=*
+Disallow: /*?gclid=*
+
+# Crawl delay for respectful crawling
+Crawl-delay: 1
+
+# Allow important pages for better indexing
+Allow: /help/how-to-download-facebook-videos
+Allow: /help/how-to-download-tiktok-videos
+Allow: /help/how-to-download-pinterest-videos
+Allow: /help/how-to-download-instagram-videos
+
+# Sitemaps
+Sitemap: https://socialgrab.app/sitemap.xml
+Sitemap: https://socialgrab.app/sitemap-pages.xml
+
+# Allow search engines to crawl media files
+Allow: /*.css$
+Allow: /*.js$
+Allow: /*.png$
+Allow: /*.jpg$
+Allow: /*.jpeg$
+Allow: /*.gif$
+Allow: /*.svg$
+Allow: /*.ico$
+
+# User agent specific rules for better indexing
+User-agent: Googlebot
+Crawl-delay: 0
+Allow: /
+
+User-agent: Bingbot
+Crawl-delay: 1
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
