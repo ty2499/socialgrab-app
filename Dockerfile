@@ -1,26 +1,22 @@
 FROM node:18-alpine
 
+# Install system dependencies for video processing
+RUN apk add --no-cache python3 py3-pip ffmpeg
+RUN pip3 install yt-dlp
+
 WORKDIR /app
 
-# Copy package files for both root and client
-COPY package*.json ./
-COPY client/package*.json ./client/
-
-# Install root dependencies
-RUN npm ci
-
-# Install client dependencies  
-RUN cd client && npm ci
-
-# Copy all source code
+# Copy everything first
 COPY . .
 
-# Build the application (this runs both vite build and esbuild)
-RUN npm run build
+# Install root dependencies
+RUN npm install
 
-# Clean up dev dependencies
-RUN npm prune --production
-RUN cd client && npm prune --production
+# Install client dependencies
+RUN cd client && npm install
+
+# Build the application
+RUN npm run build
 
 # Expose port
 EXPOSE 5000
