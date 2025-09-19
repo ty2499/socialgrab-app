@@ -1,27 +1,26 @@
 FROM node:18-alpine
 
-# Install system dependencies for video processing
+# Install minimal system dependencies
 RUN apk add --no-cache python3 py3-pip ffmpeg
-
-# Install yt-dlp using --break-system-packages flag
 RUN pip3 install --break-system-packages yt-dlp
 
 WORKDIR /app
 
-# Copy everything first
+# Copy package files
+COPY package*.json ./
+
+# Install only root dependencies
+RUN npm install --omit=dev
+
+# Copy source code
 COPY . .
 
-# Install root dependencies
-RUN npm install
-
-# Install client dependencies
-RUN cd client && npm install
-
-# Build the application
-RUN npm run build
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=5000
 
 # Expose port
 EXPOSE 5000
 
-# Start the application
-CMD ["npm", "start"]
+# Start with a simple node command
+CMD ["node", "server/index.js"]
